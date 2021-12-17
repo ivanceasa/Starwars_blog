@@ -1,42 +1,47 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+			people: [],
+			planets: [],
+			favorites: []
 		},
+
 		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
-			},
-			loadSomeData: () => {
-				/**
-					fetch().then().then(data => setStore({ "foo": data.bar }))
-				*/
-			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
+			loadingData: () => {
+				fetch("https://swapi.py4e.com/api/people/")
+					.then(resp => resp.json())
+					.then(data => setStore({ people: data.results }))
+					.catch(error => console.log(error));
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
+				fetch("https://swapi.py4e.com/api/planets/")
+					.then(resp => resp.json())
+					.then(data => setStore({ planets: data.results }))
+					.catch(error => console.log(error));
+			},
+
+			favorites: name => {
+				if(!getStore().favorites.includes(name)){
+					setStore({ favorites: [...getStore().favorites, name]});
+				}
+			},
+           
+			/*favorites: name => {
+				let store = getStore();
+				setStore({
+					favorites: store.favorites.concat(name)
 				});
+			},*/
+			/*
+			favorites: name => {
+				const store = getStore();
+				setStore({ favorites: [...store.favorites, name] });
+			},
+			*/
 
-				//reset the global store
-				setStore({ demo: demo });
+			deleteFavorite: index => {
+				const store = getStore();
+				store.favorites.splice(index, 1);
+				setStore({ favorites: store.favorites });
 			}
 		}
 	};
